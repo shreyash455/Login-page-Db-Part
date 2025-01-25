@@ -1,0 +1,27 @@
+
+-----------Login Stored Procedure----------
+CREATE PROCEDURE sp_UserLogin
+    @Username VARCHAR(50),
+    @UserPassword VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check for login details---------------
+    IF EXISTS (
+        SELECT 1
+        FROM Login
+        WHERE Username = TRIM(@Username)
+          AND UserPassword = TRIM(@UserPassword)
+    )
+    BEGIN
+        SELECT 'Login successful' AS Message;
+    END
+    ELSE
+    BEGIN
+        SELECT 'Invalid username or password' AS Message;
+    END
+END;
+
+
+EXEC sp_UserLogin @Username = 'Admin', @UserPassword = 'admin';
