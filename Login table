@@ -1,0 +1,8 @@
+CREATE TABLE Login (
+    Username VARCHAR(50) PRIMARY KEY,
+    UserPassword VARCHAR(50)
+);
+
+insert into Login values('Admin','admin');
+
+select * from Login;
