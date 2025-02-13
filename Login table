@@ -1,3 +1,316 @@
+CREATE DATABASE LMS1;
+------------------------------------------
+USE LMS1
+----------------------------------------
+-- Create Qualifications table first
+CREATE TABLE Qualification (
+    QualificationId INT PRIMARY KEY,
+    QualificationName VARCHAR(100) NOT NULL
+);
+drop table TrainingMode
+insert into Qualification (QualificationId,QualificationName)values(1,'B.Tech');
+insert into Qualification (QualificationId,QualificationName)values(2,'M.Tech');
+insert into Qualification (QualificationId,QualificationName)values(3,'BCA');
+
+-- Create Roles table
+CREATE TABLE Designation1 (
+    DesignationId INT PRIMARY KEY,
+    DesignationName VARCHAR(100) NOT NULL
+);
+EXEC sp_rename 'Designation1' ,'Designation';
+
+select * from Designation;
+
+ drop table Designation1
+insert into Designation1(DesignationId,DesignationName) values(1,'Manager');
+insert into Designation1(DesignationId,DesignationName) values(2,'Developer');
+insert into Designation1(DesignationId,DesignationName) values(3,'Tester');
+
+-- Create TrainingModes table
+CREATE TABLE TrainingMode (
+    ModeId INT PRIMARY KEY,
+    ModeName VARCHAR(100) NOT NULL
+);
+
+insert into TrainingMode(ModeId,ModeName)values(1,'Offline');
+insert into TrainingMode(ModeId,ModeName)values(2,'Online');
+insert into TrainingMode(ModeId,ModeName)values(3,'Hybrid');
+
+
+select * from Signup
+
+CREATE TABLE Signup (
+    UserID INT PRIMARY KEY IDENTITY(1,1),
+    FullName VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    UserAddress VARCHAR(255),
+    Pincode CHAR(6),
+    MobileNumber CHAR(10) NOT NULL,
+    DateOfBirth DATE,
+    CreatePassword VARCHAR(50) NOT NULL,
+    ConfirmPassword VARCHAR(50) NOT NULL,
+    YearOfPassout INT,
+    DateOfJoining DATE,
+    Qualification INT  foreign key references Qualification(QualificationId),
+    Designation1 INT  foreign key references Designation(DesignationId),
+    TrainingMode INT  foreign key references TrainingMode(ModeId),
+	IsActive BIT DEFAULT 1
+);
+----------------------------------------------------------------------------------------------
+drop procedure USP_InsertSignupRecord
+---------------------------------------------------------------------------------------------
+CREATE PROCEDURE USP_InsertSignupRecord
+    @FullName VARCHAR(100),
+    @Email VARCHAR(100),
+    @UserAddress VARCHAR(255),
+    @Pincode CHAR(6),
+    @MobileNumber CHAR(10),
+    @DateOfBirth DATE,
+    @CreatePassword VARCHAR(50),
+    @ConfirmPassword VARCHAR(50),
+    @YearOfPassout INT,
+    @DateOfJoining DATE,
+    @QualificationId INT,
+    @DesignationId INT,
+    @ModeId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+            
+        -- Insert the record
+        INSERT INTO Signup (
+            FullName,
+            Email,
+            UserAddress,
+            Pincode,
+            MobileNumber,
+            DateOfBirth,
+            CreatePassword,
+            ConfirmPassword,
+            YearOfPassout,
+            DateOfJoining,
+            Qualification,
+            Designation1,
+            TrainingMode,
+            IsActive
+        )
+        VALUES (
+            TRIM(@FullName),
+            TRIM(@Email),
+            TRIM(@UserAddress),
+            @Pincode,
+            @MobileNumber,
+            @DateOfBirth,
+            @CreatePassword,
+            @ConfirmPassword,
+            @YearOfPassout,
+            @DateOfJoining,
+            @QualificationId,
+            @DesignationId,
+            @ModeId,
+            1
+        );
+END;
+
+
+EXEC USP_InsertSignupRecord
+    @FullName = 'shreyash Dude',
+    @Email = 'shreyash9@e.com',
+    @UserAddress = '123 keskar colony',
+    @Pincode = '123456',
+    @MobileNumber = '9876543210',
+    @DateOfBirth = '1990-01-01',
+    @CreatePassword = 'StrongPassword123',
+    @ConfirmPassword = 'StrongPassword123',
+    @YearOfPassout = 2020,
+    @DateOfJoining = '2024-10-26',
+    @QualificationId = 1,  -- Assumes Qualification ID 1 exists in the Qualification table
+    @DesignationId = 2,    -- Assumes Designation ID 2 exists in the Designation table
+    @ModeId = 3  
+	----------------------------------------------------------------------------------
+drop procedure USP_InsertSignupRecord
+select * from Signup;
+---------------------------------------------------------------------------------------
+EXEC USP_UpdateSignupRecord 
+    @UserID = 1,  -- Replace with the actual UserID you want to update
+    @FullName = 'John Doe',  -- New full name
+    @UserAddress = '123 Main St, Springfield',  -- New address
+    @Pincode = '123456',  -- New pincode
+    @MobileNumber = '9876543210',  -- New mobile number
+    @DateOfBirth = '1990-01-01',  -- New date of birth
+    @CreatePassword = 'NewPassword123!',  -- New password (will be hashed)
+    @YearOfPassout = 2012,  -- New year of passout
+    @DateOfJoining = '2024-01-15',  -- New date of joining
+    @Qualification = 2,  -- New qualification ID
+    @Designation1 = 3,  -- New designation ID
+    @TrainingMode = 1,  -- New training mode ID
+    @IsActive = 1;  -- Set to active (1 for true, 0 for false)
+-------------------------------------------------------------------------------------------------
+CREATE PROCEDURE ALLRecords
+AS
+BEGIN
+    SET NOCOUNT ON;  -- Prevents extra result sets from interfering with SELECT statements
+
+    SELECT * FROM Signup;  -- Retrieves all records from the Signup table
+END;
+GO
+-------------------------------------------------------------------------------------------------
+drop procedure ALLRecords
+-------------------------------------------------------------------------------
+EXEC ALLRecords;
+
+---------------------------------------------------------------------------------------------------
+--UPDATE
+CREATE PROCEDURE USP_UpdateUserDetails
+@UserID INT,
+@FullName VARCHAR(100),
+@Email VARCHAR(100),
+@UserAddress VARCHAR(255),
+@Pincode CHAR(6),
+@MobileNumber CHAR(10),
+@DateOfBirth DATE,
+@CreatePassword  VARCHAR(50),
+@ConfirmPassword VARCHAR(50),
+@YearOfPassout INT,
+@DateOfJoining DATE,
+@Qualification INT,
+@Designation1 INT,
+@TrainingMode INT
+AS 
+BEGIN
+SET NOCOUNT ON;
+	UPDATE Signup
+	SET
+		FullName=@FullName,
+		Email=@Email,
+		UserAddress=@UserAddress,
+		Pincode=@Pincode,
+		MobileNumber=@MobileNUmber,
+		DateOfBirth=@DateOfBirth,
+		CreatePassword=@CreatePassword,
+		ConfirmPassword=@ConfirmPassword,
+		YearOfPassout=@YearOfPassout,
+		DateOfJoining=@DateOfJoining,
+		Qualification=@Qualification,
+		Designation1=@Designation1,
+		TrainingMode=@TrainingMode
+
+	WHERE UserID=@UserID
+END
+-----------------------------------------------------------------------------------------------------
+EXEC USP_UpdateUserDetails
+	@UserID=1,
+    @FullName = 'John DOEE',
+    @Email = 'john.dsvsdfsfnfvsnvnvfjnvoe1@sample.com',
+    @UserAddress = '123 Main Street',
+    @Pincode = '123456',
+    @MobileNumber = '9876543210',
+    @DateOfBirth = '1990-01-01',
+    @CreatePassword = 'StrongPassword123',
+    @ConfirmPassword = 'StrongPassword123',
+    @YearOfPassout = 2020,
+    @DateOfJoining = '2024-10-26',
+    @Qualification = 1,  -- Assumes Qualification ID 1 exists in the Qualification table
+    @Designation = 2,    -- Assumes Designation ID 2 exists in the Designation table
+    @TrainingMode = 3    -- Assumes TrainingMode ID 3 exists in the TrainingMode table
+	;
+
+	-------------------------------------------------------------------------------------------------------------------------
+--DELETE USER
+	CREATE PROC USP_DeleteUser
+	@UserID INT
+	AS
+	BEGIN
+		DELETE  FROM Signup
+		WHERE UserID=@UserID
+	END
+	-------------------------------------
+	Drop Proc USP_DeleteUser 
+------------------------------------------
+	EXEC USP_DeleteUser @UserId=1
+
+	select * from Signup
+
+--DESIGNATION LIST-------------------------------------------------
+	CREATE PROC USP_GetDesignationList
+	AS
+	BEGIN
+	SELECT * FROM Designation
+	END
+
+	exec USP_GetDesignationList
+
+--QUALIFICATION LIST----------------------------------------------
+	CREATE PROC USP_GetQualificationList
+	AS
+	BEGIN
+	SELECT * FROM QUALIFICATION
+	END
+
+	EXEC USP_GetQualificationList
+
+--TRAINING MODE LIST---------------------------------------------
+	CREATE PROC USP_GetTrainingModesList
+	AS 
+	BEGIN
+	SELECT * FROM TrainingMode
+	END
+
+	EXEC USP_GetTrainingModesList
+
+	-------------------------Signup list---------------------
+	ALTER PROCEDURE Usp_GetUserList
+	AS BEGIN
+	SET NOCOUNT ON;
+	SELECT 
+	s.UserID,s.FullName,s.Email,s.UserAddress,s.Pincode,s.MobileNumber,s.DateofBirth,s.CreatePassword,
+	s.ConfirmPassword,s.YearofPassout,s.DateofJoining,q.QualificationName,d.DesignationName,t.ModeName
+	FROM Signup s
+	INNER JOIN
+    Qualification q ON s.Qualification =q.QualificationId
+	INNER JOIN
+	Designation  d ON s.Designation1 = d.DesignationId 
+	INNER JOIN
+	TrainingMode  t ON s.TrainingMode = t.ModeId
+	END;
+
+	EXEC Usp_GetUserList;
+
+	----------------------------------------
+
+	CREATE PROCEDURE Usp_GetSingleUser
+    @UserID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT 
+        s.UserID,
+        s.FullName,
+        s.Email, 
+        s.UserAddress,
+        s.Pincode,
+        s.MobileNumber,
+        s.DateofBirth,
+        s.CreatePassword,
+        s.ConfirmPassword,
+        s.YearofPassout,
+        s.DateofJoining,
+        q.QualificationId,
+        q.QualificationName,
+        d.DesignationId,
+        d.DesignationName,
+        t.ModeId,
+        t.ModeName
+    FROM Signup s
+    INNER JOIN Qualification q ON s.Qualification = q.QualificationId
+    INNER JOIN Designation d ON s.Designation1 = d.DesignationId
+    INNER JOIN TrainingMode t ON s.TrainingMode = t.ModeId
+    WHERE s.UserID = @UserID;
+END;
+exec Usp_GetSingleUser 18
+
+
+------------------------for Login Page--------------------
 CREATE TABLE Login (
     Username VARCHAR(50) PRIMARY KEY,
     UserPassword VARCHAR(50)
@@ -6,3 +319,32 @@ CREATE TABLE Login (
 insert into Login values('Admin','admin');
 
 select * from Login;
+
+
+
+-----------Login Stored Procedure----------
+CREATE PROCEDURE sp_UserLogin
+    @Username VARCHAR(50),
+    @UserPassword VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Check for login details---------------
+    IF EXISTS (
+        SELECT 1
+        FROM Login
+        WHERE Username = TRIM(@Username)
+          AND UserPassword = TRIM(@UserPassword)
+    )
+    BEGIN
+        SELECT 'Login successful' AS Message;
+    END
+    ELSE
+    BEGIN
+        SELECT 'Invalid username or password' AS Message;
+    END
+END;
+
+
+EXEC sp_UserLogin @Username = 'Admin', @UserPassword = 'admin';
